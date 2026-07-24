@@ -1,5 +1,8 @@
+@import "tailwindcss";
+
+@layer base {
 :root {
-  --text: #6b6375;
+  /* --text: #6b6375;
   --text-h: #08060d;
   --bg: #fff;
   --border: #e5e4e7;
@@ -13,9 +16,9 @@
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  --mono: ui-monospace, Consolas, monospace; */
 
-  font: 18px/145% var(--sans);
+  /* font: 18px/145% var(--sans);
   letter-spacing: 0.18px;
   color-scheme: light dark;
   color: var(--text);
@@ -23,15 +26,15 @@
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  -moz-osx-font-smoothing: grayscale; */
 
-  @media (max-width: 1024px) {
+  /* @media (max-width: 1024px) {
     font-size: 16px;
-  }
+  } */
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  /* :root {
     --text: #9ca3af;
     --text-h: #f3f4f6;
     --bg: #16171d;
@@ -47,7 +50,7 @@
 
   #social .button-icon {
     filter: invert(1) brightness(2);
-  }
+  } */
 }
 
 body {
@@ -55,15 +58,15 @@ body {
 }
 
 #root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
+      /* width: 1126px;
+      max-width: 100%;
+      margin: 0 auto;
+      text-align: center;
+      border-inline: 1px solid var(--border);
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box; */
 }
 
 h1,
@@ -108,4 +111,5 @@ code {
   line-height: 135%;
   padding: 4px 8px;
   background: var(--code-bg);
+}
 }
