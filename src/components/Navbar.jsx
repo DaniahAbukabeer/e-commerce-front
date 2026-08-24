@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink } from "react-router-dom";
 
 export const Navbar = () => {
   return (
@@ -11,7 +11,7 @@ export const Navbar = () => {
           to="/"
           end
           className={({ isActive }) =>
-            isActive ? 'nav-link active' : 'nav-link'
+            isActive ? "nav-link active" : "nav-link"
           }
         >
           Home
@@ -19,12 +19,12 @@ export const Navbar = () => {
         <NavLink
           to="/shop"
           className={({ isActive }) =>
-            isActive ? 'nav-link active' : 'nav-link'
+            isActive ? "nav-link active" : "nav-link"
           }
         >
           Shop
         </NavLink>
       </nav>
     </header>
-  )
-}
+  );
+};
