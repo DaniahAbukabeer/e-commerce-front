@@ -6,7 +6,7 @@ export const Home = () => {
     <section className="page">
       <div className="hero">
         <div className="hero-copy">
-          <span className="eyebrow">psst — new show up now</span>
+          <span className="eyebrow">psst new show up now</span>
           <h1>
             A little <span className="scribble-underline">studio</span>
             <br />

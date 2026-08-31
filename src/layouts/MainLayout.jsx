@@ -24,14 +24,23 @@ export default function MainLayout() {
   const [scrolled, setScrolled] = useState(false);
   const [flyer, setFlyer] = useState(null); // { style, src }
   const rafRef = useRef(null);
-  const startRectRef = useRef(null);
+
+  useEffect(() => {
+    // stop the browser from restoring the old scroll offset on back/forward
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+  }, []);
 
   useEffect(() => {
     // the hero (and its mascot anchor) only exists on some routes, and
     // remounts on navigation, so re-measure everything on each route change
-    startRectRef.current = null;
     setFlyer(null);
     setScrolled(false);
+
+    // every new page starts at the top, regardless of where the last
+    // page was scrolled to — "auto" so it jumps instantly, not smoothly
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
 
     const update = () => {
       const heroAnchor = document.getElementById("hero-mascot-anchor");
@@ -43,18 +52,6 @@ export default function MainLayout() {
         setScrolled(window.scrollY > 24);
         setFlyer(null);
         return;
-      }
-
-      // capture the mascot's natural resting spot once, in page coordinates,
-      // so we can keep computing its "would-be" position as the page scrolls
-      if (!startRectRef.current) {
-        const r = heroAnchor.getBoundingClientRect();
-        startRectRef.current = {
-          top: r.top + window.scrollY,
-          left: r.left,
-          width: r.width,
-          height: r.height,
-        };
       }
 
       const heroSection = heroAnchor.closest(".hero");
@@ -72,18 +69,26 @@ export default function MainLayout() {
       dock.style.marginRight = `${10 * slotT}px`;
 
       const dockRect = dock.getBoundingClientRect();
-      const start = startRectRef.current;
-      const startTop = start.top - window.scrollY;
+
+      // read the mascot's LIVE natural position every single frame —
+      // it never actually leaves the DOM (we only fade its opacity), so
+      // this is always accurate and can never go stale, unlike a value
+      // captured once and cached in a ref
+      const liveRect = heroAnchor.getBoundingClientRect();
 
       // fly between CENTER points rather than box edges — the dock's own
       // box is opening from 0 width during the flight, so its edges move,
       // but its vertical center and left edge stay put, giving a stable target
-      const startCenterX = start.left + start.width / 2;
-      const startCenterY = startTop + start.height / 2;
+      const startCenterX = liveRect.left + liveRect.width / 2;
+      const startCenterY = liveRect.top + liveRect.height / 2;
       const endCenterX = dockRect.left + DOCK_SIZE / 2;
       const endCenterY = dockRect.top + dockRect.height / 2;
 
-      const size = lerp(Math.max(start.width, start.height), DOCK_SIZE, eased);
+      const size = lerp(
+        Math.max(liveRect.width, liveRect.height),
+        DOCK_SIZE,
+        eased,
+      );
       const cx = lerp(startCenterX, endCenterX, eased);
       const cy = lerp(startCenterY, endCenterY, eased);
 

@@ -54,7 +54,13 @@
     url("./assets/textures/paper-texture-2.jpg"),
     url("./assets/textures/paper-texture-3.jpg");
   background-repeat: repeat, repeat, repeat, repeat, repeat, repeat;
-  background-size: auto, auto, auto, 640px auto, 780px auto, 900px auto;
+  background-size:
+    auto,
+    auto,
+    auto,
+    640px auto,
+    780px auto,
+    900px auto;
   background-blend-mode: normal, normal, normal, multiply, multiply, multiply;
 }
 
@@ -327,13 +333,12 @@
 /* ============================================================
    HERO — big, tall, and decorated
    ============================================================ */
-
 .hero {
   position: relative;
-  min-height: 62vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  min-height: 58vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(220px, 0.85fr);
+  align-items: center;
   gap: 20px;
   padding: 40px 0 32px;
 }
@@ -343,19 +348,10 @@
   z-index: 1;
 }
 
-.hero::before {
-  content: "";
-  position: absolute;
-  top: 4%;
-  right: -2%;
-  width: min(320px, 42vw);
-  height: min(320px, 42vw);
-  /* background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><circle cx='100' cy='100' r='90' fill='none' stroke='%235b2159' stroke-width='6' stroke-dasharray='3 16' stroke-linecap='round'/></svg>"); */
-  background-repeat: no-repeat;
-  background-size: contain;
-  opacity: 0.55;
-  pointer-events: none;
-  z-index: 0;
+.hero-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .hero .eyebrow {
@@ -363,7 +359,7 @@
 }
 
 .hero h1 {
-  font-size: clamp(46px, 7.5vw, 92px);
+  font-size: clamp(46px, 6.6vw, 88px);
   line-height: 94%;
   max-width: 14ch;
   margin: 0;
@@ -380,10 +376,63 @@
   font-size: 1.02rem;
 }
 
-@media (max-width: 640px) {
+/* ---- hero collage — a torn scrap "pinned" behind the mascot ---- */
+.hero-collage {
+  position: relative;
+  justify-self: center;
+  width: min(320px, 100%);
+  aspect-ratio: 1 / 1.05;
+}
+
+.hero-collage__scrap {
+  position: absolute;
+  inset: 12% 10%;
+  background: var(--paper-soft);
+  border: 2.5px solid var(--ink);
+  border-radius: 6px;
+  transform: rotate(4deg);
+  box-shadow: 6px 8px 0 var(--shadow-soft);
+}
+
+.hero-collage__scrap::after {
+  content: "";
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  width: 34px;
+  height: 16px;
+  transform: translateX(-50%) rotate(-3deg);
+  background: rgba(251, 243, 225, 0.75);
+  border: 1.5px solid var(--brown-soft);
+}
+
+.hero-collage__mascot {
+  position: absolute;
+  inset: 4%;
+  display: block;
+  width: 92%;
+  height: auto;
+  transform: rotate(-5deg);
+  filter: drop-shadow(4px 6px 0 var(--shadow-soft));
+}
+
+.hero-collage__tag {
+  position: absolute;
+  bottom: -6px;
+  left: -10px;
+  transform: rotate(-6deg);
+}
+
+@media (max-width: 860px) {
   .hero {
-    min-height: 48vh;
-    padding: 24px 0 20px;
+    grid-template-columns: 1fr;
+    min-height: auto;
+    padding: 8px 0 20px;
+  }
+  .hero-collage {
+    order: -1;
+    width: min(220px, 60vw);
+    margin: 0 auto;
   }
 }
 
@@ -989,6 +1038,13 @@
   padding: 20px clamp(28px, 4vw, 48px);
   background: var(--brown);
   color: var(--cream);
+  display: flex;
+  flex: 1;
+  min-height: 370px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 24px;
 }
 
 .site-footer small {
@@ -996,6 +1052,73 @@
   opacity: 0.85;
 }
 
+.site-footer__links {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(120px, auto));
+  gap: 32px;
+}
+
+.site-footer__col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+}
+
+.site-footer__col a {
+  color: var(--cream);
+  text-decoration: none;
+  opacity: 0.85;
+}
+
+.site-footer__col a:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+.site-footer__col span {
+  opacity: 0.75;
+}
+
+.site-footer__heading {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--plum-tint);
+  margin: 0 0 2px;
+}
+
+@media (max-width: 640px) {
+  .site-footer__links {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+}
+
+.site-footer__badge{
+  position: absolute;
+  /* padding: 12px; */
+  top: 20px;
+  left: 20px;
+}
+
+.footer-background-text {
+  position: absolute;
+  top: 60%;
+  right: 10%;
+  font-size: 12rem;
+  font-weight: 900;
+  font-family: var(--font-display);
+  color: rgba(255, 255, 255, 0.15);
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+  z-index: 0;
+}
 /* ============================================================
    APP SHELL
    ============================================================ */
@@ -1132,6 +1255,7 @@
     display: none;
   }
 }
+
 /* ============================================================
    RESPONSIVE
    ============================================================ */
