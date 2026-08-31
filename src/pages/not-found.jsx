@@ -1,21 +1,21 @@
 import { Link } from "react-router-dom";
+import { mascot } from "../assets/mascot";
 
 export const NotFound = () => {
   return (
     <section className="page paper-grain" style={{ padding: "40px 24px" }}>
       <div
-        className="doodle item-card"
-        style={{ maxWidth: 420, margin: "0 auto", textAlign: "center" }}
+        className="doodle item-card empty-state"
+        style={{ maxWidth: 420, margin: "0 auto" }}
       >
-        <span className="sticky-note" style={{ alignSelf: "center" }}>
-          oops!
-        </span>
+        <img src={mascot.wander} alt="" className="mascot" />
+        <span className="sticky-note">oops!</span>
         <h1 style={{ fontSize: 36 }}>Page not found</h1>
-        <p>This one must have fallen off the wall.</p>
+        <p>This one must have wandered off the wall.</p>
         <Link
           to="/"
           className="btn btn-primary doodle doodle-tight"
-          style={{ alignSelf: "center", marginTop: 8 }}
+          style={{ marginTop: 8 }}
         >
           Go back home
         </Link>

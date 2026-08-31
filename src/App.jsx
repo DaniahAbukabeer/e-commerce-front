@@ -4,6 +4,7 @@ import MainLayout from "./layouts/MainLayout";
 import { Home } from "./pages/home";
 import { Shop } from "./pages/shop";
 import { EventDetail } from "./pages/event-detail";
+import { MailClub } from "./pages/mail-club";
 import { NotFound } from "./pages/not-found";
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
           <Route index element={<Home />} />
           <Route path="shop" element={<Shop />} />
           <Route path="events/:eventId" element={<EventDetail />} />
+          <Route path="mail-club" element={<MailClub />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

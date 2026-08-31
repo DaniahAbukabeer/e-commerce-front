@@ -1,3 +1,5 @@
+import { mascot } from "../assets/mascot";
+
 const products = [
   {
     name: "Speckled Mug",
@@ -40,12 +42,22 @@ const products = [
 export const Shop = () => {
   return (
     <section className="page">
-      <span className="eyebrow">fresh off the shelf</span>
-      <h1>Shop</h1>
-      <p style={{ maxWidth: "56ch", color: "var(--brown-soft)" }}>
-        Everything here is made or printed in the studio. New pieces go up most
-        Fridays.
-      </p>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
+        <div>
+          <span className="eyebrow">fresh off the shelf</span>
+          <h1>Shop</h1>
+          <p style={{ maxWidth: "56ch", color: "var(--brown-soft)" }}>
+            Everything here is made or printed in the studio. New pieces go up
+            most Fridays.
+          </p>
+        </div>
+        <img
+          src={mascot.painting}
+          alt=""
+          className="mascot section-mascot"
+          style={{ marginTop: 4 }}
+        />
+      </div>
 
       <div className="card-grid">
         {products.map((p) => (
