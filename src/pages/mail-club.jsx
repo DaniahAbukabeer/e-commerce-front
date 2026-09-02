@@ -5,7 +5,7 @@ const BENEFITS = [
   {
     mark: "✒",
     title: "A handwritten note",
-    body: "Every parcel comes with a note from whoever's in the studio that week — no two are the same.",
+    body: "Every parcel comes with a note from whoever's in the studio that week no two are the same.",
   },
   {
     mark: "★",
@@ -40,7 +40,7 @@ export const MailClub = () => {
         <span className="eyebrow">a little something in the mail</span>
         <h1>The Mail Club</h1>
         <p style={{ fontSize: "1.05rem", color: "var(--brown-soft)" }}>
-          A once-a-month envelope from the studio — a small print, a scrap of
+          A once-a-month envelope from the studio a small print, a scrap of
           whatever we're working on, and a note about what's new. It's part
           newsletter, part care package.
         </p>
@@ -71,7 +71,7 @@ export const MailClub = () => {
           <div className="confirm-note">
             <img src={mascot.yay} alt="" className="mascot" />
             <span className="sticky-note" style={{ fontSize: "1.15rem" }}>
-              you're on the list — check your inbox for a welcome note
+              you're on the list check your inbox for a welcome note
             </span>
           </div>
         ) : (
@@ -92,7 +92,7 @@ export const MailClub = () => {
                 type="submit"
                 className="btn btn-primary doodle doodle-tight"
               >
-                Subscribe — $12/mo
+                Subscribe $12/mo
               </button>
             </div>
           </form>

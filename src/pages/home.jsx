@@ -13,7 +13,7 @@ export const Home = () => {
             for a lot of art.
           </h1>
           <p>
-            Prints, pots, and one-offs made in the studio downstairs — plus a
+            Prints, pots, and one-offs made in the studio downstairs plus a
             running calendar of workshops and openings happening in the space.
           </p>
 
@@ -45,7 +45,7 @@ export const Home = () => {
         <div>
           <h2>Upcoming events</h2>
           <p className="section-sub">
-            Workshops and open studio sessions — pick a date, grab a seat.
+            Workshops and open studio sessions pick a date, grab a seat.
           </p>
         </div>
       </div>
@@ -59,7 +59,7 @@ export const Home = () => {
           <div className="event-card__body">
             <h3>Linocut Workshop</h3>
             <p>
-              Carve, ink, and pull your first print — all materials included.
+              Carve, ink, and pull your first print all materials included.
             </p>
             <div className="event-card__footer">
               <span className="tag tag--on-dark">$45</span>
@@ -93,7 +93,7 @@ export const Home = () => {
         <div>
           <h2>From the studio</h2>
           <p className="section-sub">
-            Prints, pots, and small-batch pieces — ready to take home.
+            Prints, pots, and small-batch pieces ready to take home.
           </p>
         </div>
         <Link to="/shop" className="section-link">
@@ -135,7 +135,7 @@ export const Home = () => {
           <span className="eyebrow">✉ once a month</span>
           <h2>Join the Mail Club</h2>
           <p>
-            A little envelope from the studio — a small print, a note, and first
+            A little envelope from the studio a small print, a note, and first
             dibs on what's new.
           </p>
         </div>

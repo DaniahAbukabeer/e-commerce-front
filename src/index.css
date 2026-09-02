@@ -18,13 +18,34 @@
 
   body {
     margin: 0;
-    font: 400 17px/150% var(--font-body, system-ui, sans-serif);
+    font: 400 17px/150% var(--font-body, 'Readex Pro', system-ui, sans-serif);
     color: var(--ink, #271b10);
     background: var(--ink, #271b10);
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Arabic text: large/display uses Oi, smaller uses Readex Pro */
+  :lang(ar) h1,
+  :lang(ar) h2,
+  :lang(ar) h3,
+  :lang(ar) h4,
+  :lang(ar) h5,
+  :lang(ar) h6,
+  [lang='ar'] h1,
+  [lang='ar'] h2,
+  [lang='ar'] h3,
+  [lang='ar'] h4,
+  [lang='ar'] h5,
+  [lang='ar'] h6 {
+    font-family: 'Oi', serif;
+  }
+
+  :lang(ar),
+  [lang='ar'] {
+    font-family: 'Readex Pro', system-ui, sans-serif;
   }
 
   #root {
@@ -35,7 +56,7 @@
 
   h1,
   h2 {
-    font-family: var(--font-display, sans-serif);
+    font-family: var(--font-display, 'Modak', sans-serif);
     font-weight: 400;
     text-transform: uppercase;
     color: var(--ink, #271b10);
@@ -61,6 +82,15 @@
     @media (max-width: 1024px) {
       font-size: 21px;
     }
+  }
+
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Modak', sans-serif;
+    font-weight: 400;
+    color: var(--ink, #271b10);
   }
 
   p {

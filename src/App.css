@@ -19,9 +19,9 @@
 
   /* ---- ink & accent ---- */
   --ink: #271b10; /* near-black brown, primary text + line work */
-  --plum: #5b2159; /* dark plump purple — primary accent */
-  --plum-deep: #3a123b; /* pressed / hover state of accent */
-  --plum-tint: #efe1e7; /* pale plum wash, tag/badge backgrounds */
+  --plum: #5C0124; /* dark plump purple — primary accent */
+  --plum-deep: #3A0016; /* pressed / hover state of accent */
+  --plum-tint: #C586A1; /* pale plum wash, tag/badge backgrounds */
   --cream: #fbf3e1; /* light text on brown/plum + torn-reveal color */
 
   --shadow-ink: rgba(39, 27, 16, 0.22);
@@ -33,8 +33,8 @@
   --tear-color: var(--ink);
 
   /* ---- type ---- */
-  --font-display: "Anton", "Arial Narrow", sans-serif;
-  --font-body: "Work Sans", system-ui, sans-serif;
+  --font-display: "Modak", sans-serif;
+  --font-body: "Readex Pro", system-ui, sans-serif;
   --font-hand: "Caveat", cursive;
   --font-mono: "Space Mono", ui-monospace, monospace;
 }

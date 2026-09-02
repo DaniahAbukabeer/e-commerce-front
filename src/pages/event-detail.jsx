@@ -8,7 +8,7 @@ const EVENTS = {
     title: "Linocut Printmaking Workshop",
     tagline: "Carve, ink, and pull your first print.",
     description:
-      "A relaxed, beginner-friendly session in the studio downstairs. We'll cover carving technique, registration, and hand-inking a two-colour print — no experience needed, and everyone leaves with a small stack of prints to keep.",
+      "A relaxed, beginner-friendly session in the studio downstairs. We'll cover carving technique, registration, and hand-inking a two-colour print no experience needed, and everyone leaves with a small stack of prints to keep.",
     location: "Studio downstairs",
     duration: "2.5 hours",
     price: "$45",
@@ -107,7 +107,7 @@ export const EventDetail = () => {
     return (
       <section className="page">
         <h1>Event not found</h1>
-        <p>We couldn't find that one — it may have already wrapped up.</p>
+        <p>We couldn't find that one it may have already wrapped up.</p>
         <Link
           to="/"
           className="btn btn-outline doodle doodle-tight"
@@ -226,7 +226,7 @@ export const EventDetail = () => {
           <div className="confirm-note">
             <img src={mascot.yay} alt="" className="mascot" />
             <span className="sticky-note" style={{ fontSize: "1.2rem" }}>
-              you're in — see you {activeDay.day} {activeDay.date}{" "}
+              you're in see you {activeDay.day} {activeDay.date}{" "}
               {activeDay.month} at {selectedTime}
             </span>
           </div>
@@ -236,7 +236,7 @@ export const EventDetail = () => {
             disabled={!selectedTime}
             onClick={() => setBooked(true)}
           >
-            Reserve your spot — {event.price}
+            Reserve your spot {event.price}
           </button>
         )}
       </div>
