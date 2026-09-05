@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ShoppingBag,
@@ -9,27 +10,35 @@ import {
 } from "lucide-react";
 import { StatCard } from "../../components/admin/StatCard";
 import { StatusBadge } from "../../components/admin/StatusBadge";
-import { orders } from "../../data/orders";
-import { products } from "../../data/products";
-import { events } from "../../data/events";
-import { mailClubSubscribers } from "../../data/mailClubSubscribers";
+import { api, asNumber, formatDate, normalizeStatus } from "../../api/client";
 
-const currency = (n) => `$${n.toLocaleString()}`;
+const currency = (n) => `$${asNumber(n).toLocaleString()}`;
 
 export const AdminDashboard = () => {
-  const revenue = orders
-    .filter((o) => o.payment === "paid")
-    .reduce((sum, o) => sum + o.total, 0);
+  const [data, setData] = useState({ orders: [], products: [], events: [], subscribers: [] });
+  const [error, setError] = useState("");
 
-  const activeSubscribers = mailClubSubscribers.filter(
-    (s) => s.status === "active",
+  useEffect(() => {
+    Promise.all([api.admin.orders(), api.admin.products(), api.admin.events(), api.admin.subscribers()])
+      .then(([ordersResponse, productsResponse, eventsResponse, subscribersResponse]) => setData({ orders: ordersResponse.orders, products: productsResponse.products, events: eventsResponse.events, subscribers: subscribersResponse.subscribers }))
+      .catch((requestError) => setError(requestError.message));
+  }, []);
+
+  const { orders, products, events, subscribers } = data;
+  const revenue = orders
+    .filter((order) => normalizeStatus(order.payment) === "paid")
+    .reduce((sum, order) => sum + asNumber(order.total), 0);
+
+  const activeSubscribers = subscribers.filter(
+    (subscriber) => normalizeStatus(subscriber.status) === "active",
   ).length;
-  const upcomingEvents = events.filter((e) => e.status === "upcoming");
+  const upcomingEvents = events.filter((event) => normalizeStatus(event.status) === "upcoming");
   const lowStock = products.filter((p) => p.stock <= p.lowStockThreshold);
   const recentOrders = orders.slice(0, 6);
 
   return (
     <div>
+      {error && <p className="admin-page-sub" role="alert">{error}</p>}
       <div className="admin-grid-stats">
         <StatCard
           label="Revenue (paid)"
@@ -72,15 +81,15 @@ export const AdminDashboard = () => {
             {recentOrders.map((o) => (
               <Link
                 key={o.id}
-                to={`/admin/orders/${o.id}`}
+                to={`/admin/orders/${o.code}`}
                 className="admin-list__row"
               >
                 <div style={{ minWidth: 0, flex: "1 1 120px" }}>
-                  <p className="admin-cell-title">{o.id}</p>
-                  <p className="admin-cell-sub">{o.customer.name}</p>
+                  <p className="admin-cell-title">{o.code}</p>
+                  <p className="admin-cell-sub">{o.customerName}</p>
                 </div>
                 <span className="admin-cell-muted" style={{ fontSize: 12.5 }}>
-                  {o.date}
+                  {formatDate(o.createdAt)}
                 </span>
                 <span
                   style={{ fontWeight: 600, width: 56, textAlign: "right" }}
@@ -88,7 +97,7 @@ export const AdminDashboard = () => {
                   {currency(o.total)}
                 </span>
                 <div style={{ width: 100, textAlign: "right" }}>
-                  <StatusBadge status={o.status} />
+                  <StatusBadge status={normalizeStatus(o.status)} />
                 </div>
               </Link>
             ))}

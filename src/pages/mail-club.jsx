@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { mascot } from "../assets/mascot";
+import { api } from "../api/client";
 
 const BENEFITS = [
   {
@@ -25,13 +26,21 @@ const BENEFITS = [
 ];
 
 export const MailClub = () => {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email.trim()) return;
-    setSubscribed(true);
+    setSubmitting(true);
+    setError("");
+    try {
+      await api.store.subscribe({ name, email });
+      setSubscribed(true);
+    } catch (requestError) { setError(requestError.message); }
+    finally { setSubmitting(false); }
   };
 
   return (
@@ -81,6 +90,7 @@ export const MailClub = () => {
               month.
             </p>
             <div className="mail-club-form__row">
+              <input required placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} />
               <input
                 type="email"
                 required
@@ -91,10 +101,12 @@ export const MailClub = () => {
               <button
                 type="submit"
                 className="btn btn-primary doodle doodle-tight"
+                disabled={submitting}
               >
-                Subscribe $12/mo
+                {submitting ? "Subscribing..." : "Subscribe $12/mo"}
               </button>
             </div>
+            {error && <p style={{ color: "var(--brown-soft)" }} role="alert">{error}</p>}
           </form>
         )}
       </div>

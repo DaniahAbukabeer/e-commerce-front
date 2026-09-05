@@ -1,11 +1,12 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search, Plus, Pencil, Trash2 } from "lucide-react";
 import { StatusBadge } from "../../components/admin/StatusBadge";
 import { Modal } from "../../components/admin/Modal";
 import { Field } from "../../components/admin/Field";
-import { products as initialProducts, categories } from "../../data/products";
+import { api, asNumber, normalizeStatus } from "../../api/client";
 
-const currency = (n) => `$${n.toLocaleString()}`;
+const currency = (n) => `$${asNumber(n).toLocaleString()}`;
+const categories = ["Ceramics", "Prints", "Textiles"];
 
 const stockLevel = (p) => {
   if (p.stock === 0) return "out_of_stock";
@@ -22,13 +23,20 @@ const emptyDraft = {
 };
 
 export const AdminStock = () => {
-  // Local state seeded from the static data file — swap this for a real
-  // `GET /api/products` fetch + mutation calls when the API is ready.
-  const [products, setProducts] = useState(initialProducts);
+  const [products, setProducts] = useState([]);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [draft, setDraft] = useState(emptyDraft);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    api.admin.products()
+      .then(({ products: responseProducts }) =>
+        setProducts(responseProducts.map((product) => ({ ...product, status: normalizeStatus(product.status) }))),
+      )
+      .catch((requestError) => setError(requestError.message));
+  }, []);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -42,38 +50,33 @@ export const AdminStock = () => {
     });
   }, [products, query, category]);
 
-  const updateStock = (id, delta) => {
-    setProducts((prev) =>
-      prev.map((p) =>
-        p.id === id ? { ...p, stock: Math.max(0, p.stock + delta) } : p,
-      ),
-    );
+  const updateStock = async (id, delta) => {
+    try {
+      const { product } = await api.admin.adjustStock(id, delta);
+      setProducts((prev) => prev.map((item) => item.id === id ? { ...product, status: normalizeStatus(product.status) } : item));
+    } catch (requestError) { setError(requestError.message); }
   };
 
-  const removeProduct = (id) => {
-    setProducts((prev) => prev.filter((p) => p.id !== id));
+  const removeProduct = async (id) => {
+    try {
+      await api.admin.deleteProduct(id);
+      setProducts((prev) => prev.filter((product) => product.id !== id));
+    } catch (requestError) { setError(requestError.message); }
   };
 
-  const addProduct = (e) => {
+  const addProduct = async (e) => {
     e.preventDefault();
     if (!draft.name.trim()) return;
-    setProducts((prev) => [
-      {
-        id: `prod_${Date.now()}`,
-        sku: draft.sku || "AA-NEW",
-        name: draft.name,
-        category: draft.category,
-        price: Number(draft.price) || 0,
+    try {
+      const { product } = await api.admin.createProduct({
+        ...draft,
+        price: Number(draft.price),
         stock: Number(draft.stock) || 0,
-        lowStockThreshold: 10,
-        status: "draft",
-        media: "new item",
-        updatedAt: new Date().toISOString().slice(0, 10),
-      },
-      ...prev,
-    ]);
-    setDraft(emptyDraft);
-    setModalOpen(false);
+      });
+      setProducts((prev) => [{ ...product, status: normalizeStatus(product.status) }, ...prev]);
+      setDraft(emptyDraft);
+      setModalOpen(false);
+    } catch (requestError) { setError(requestError.message); }
   };
 
   return (
@@ -95,6 +98,7 @@ export const AdminStock = () => {
           Add product
         </button>
       </div>
+      {error && <p className="admin-page-sub" role="alert">{error}</p>}
 
       <div className="admin-pillbar">
         {["all", ...categories].map((c) => (

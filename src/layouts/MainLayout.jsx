@@ -23,7 +23,14 @@ export default function MainLayout() {
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [flyer, setFlyer] = useState(null); // { style, src }
+  const [routePath, setRoutePath] = useState(location.pathname);
   const rafRef = useRef(null);
+
+  if (routePath !== location.pathname) {
+    setRoutePath(location.pathname);
+    setFlyer(null);
+    setScrolled(false);
+  }
 
   useEffect(() => {
     // stop the browser from restoring the old scroll offset on back/forward
@@ -33,11 +40,6 @@ export default function MainLayout() {
   }, []);
 
   useEffect(() => {
-    // the hero (and its mascot anchor) only exists on some routes, and
-    // remounts on navigation, so re-measure everything on each route change
-    setFlyer(null);
-    setScrolled(false);
-
     // every new page starts at the top, regardless of where the last
     // page was scrolled to — "auto" so it jumps instantly, not smoothly
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });

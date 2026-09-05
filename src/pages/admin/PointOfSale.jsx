@@ -21,7 +21,12 @@ const CATEGORY_ICONS = {
   Textiles: Shirt,
 };
 
-const emptyModalState = { product: null, qty: 1, notes: "", editingCartId: null };
+const emptyModalState = {
+  product: null,
+  qty: 1,
+  notes: "",
+  editingCartId: null,
+};
 
 export const AdminPointOfSale = () => {
   // Seeded from the same static product data the Stock page uses. Swap for
@@ -39,8 +44,8 @@ export const AdminPointOfSale = () => {
   const [activeCategory, setActiveCategory] = useState("All");
   const [query, setQuery] = useState("");
   const [cart, setCart] = useState([]); // { cartId, productId, name, price, media, qty, notes }
-  const [orderType, setOrderType] = useState("Dine In");
-  const [tableNumber, setTableNumber] = useState("");
+  const [customerName, setCustomerName] = useState("");
+  const [fulfillment, setFulfillment] = useState("Take today");
   const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [promoCode, setPromoCode] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
@@ -50,7 +55,8 @@ export const AdminPointOfSale = () => {
   const filteredProducts = useMemo(() => {
     const q = query.trim().toLowerCase();
     return products.filter((p) => {
-      const matchesCategory = activeCategory === "All" || p.category === activeCategory;
+      const matchesCategory =
+        activeCategory === "All" || p.category === activeCategory;
       const matchesQuery = !q || p.name.toLowerCase().includes(q);
       return matchesCategory && matchesQuery;
     });
@@ -134,15 +140,15 @@ export const AdminPointOfSale = () => {
 
   const placeOrder = () => {
     if (cart.length === 0) return;
-    // Local-only for now — wire this up to `POST /api/orders` once the
+    // Local-only for now — wire this up to `POST /api/admin/orders` once the
     // frontend has an access token to send:
     //
-    // await fetch("/api/orders", {
+    // await fetch(`${API_URL}/api/admin/orders`, {
     //   method: "POST",
     //   headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
     //   body: JSON.stringify({
-    //     customerName: "Walk-in",
-    //     shipping: orderType === "Pickup" ? "PICKUP" : "STANDARD",
+    //     customerName: customerName.trim() || "Walk-in",
+    //     shipping: fulfillment === "Ship to customer" ? "STANDARD" : "PICKUP",
     //     payment: "PAID",
     //     items: cart.map((i) => ({ productId: i.productId, qty: i.qty, notes: i.notes || undefined })),
     //   }),
@@ -158,11 +164,16 @@ export const AdminPointOfSale = () => {
         return sold ? { ...p, stock: Math.max(0, p.stock - sold) } : p;
       }),
     );
-    setPlacedOrder({ code: `AA-${Math.floor(1000 + Math.random() * 9000)}`, total });
+    setPlacedOrder({
+      code: `AA-${Math.floor(1000 + Math.random() * 9000)}`,
+      total,
+    });
   };
 
   const startNewSale = () => {
     setCart([]);
+    setCustomerName("");
+    setFulfillment("Take today");
     setPromoCode("");
     setPromoApplied(false);
     setPlacedOrder(null);
@@ -172,7 +183,10 @@ export const AdminPointOfSale = () => {
     <div className="pos-shell">
       {/* ---- left: menu ---- */}
       <div>
-        <div className="admin-search-input" style={{ maxWidth: "100%", marginBottom: 4 }}>
+        <div
+          className="admin-search-input"
+          style={{ maxWidth: "100%", marginBottom: 4 }}
+        >
           <Search size={16} />
           <input
             value={query}
@@ -225,7 +239,9 @@ export const AdminPointOfSale = () => {
                 <p className="pos-card__name">{p.name}</p>
                 <div className="pos-card__footer">
                   <span className="pos-card__tag">{p.category}</span>
-                  <span className="pos-card__price">{currency(Number(p.price))}</span>
+                  <span className="pos-card__price">
+                    {currency(Number(p.price))}
+                  </span>
                 </div>
               </button>
             );
@@ -249,28 +265,20 @@ export const AdminPointOfSale = () => {
 
         {!placedOrder && (
           <div className="pos-cart__meta">
+            <input
+              className="admin-input"
+              placeholder="Customer name (optional)"
+              value={customerName}
+              onChange={(e) => setCustomerName(e.target.value)}
+            />
             <select
               className="admin-select"
-              value={orderType}
-              onChange={(e) => setOrderType(e.target.value)}
+              value={fulfillment}
+              onChange={(e) => setFulfillment(e.target.value)}
             >
-              <option>Dine In</option>
-              <option>Takeaway</option>
-              <option>Pickup</option>
+              <option>Take today</option>
+              <option>Ship to customer</option>
             </select>
-            {orderType === "Dine In" ? (
-              <input
-                className="admin-input"
-                placeholder="Table #"
-                value={tableNumber}
-                onChange={(e) => setTableNumber(e.target.value)}
-              />
-            ) : (
-              <select className="admin-select" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
-                <option>Cash</option>
-                <option>Card</option>
-              </select>
-            )}
           </div>
         )}
 
@@ -282,7 +290,10 @@ export const AdminPointOfSale = () => {
             <p className="admin-cell-muted" style={{ marginBottom: 18 }}>
               Total charged: {currency(placedOrder.total)}
             </p>
-            <button className="admin-btn admin-btn--primary pos-place-btn" onClick={startNewSale}>
+            <button
+              className="admin-btn admin-btn--primary pos-place-btn"
+              onClick={startNewSale}
+            >
               Start new sale
             </button>
           </div>
@@ -290,7 +301,9 @@ export const AdminPointOfSale = () => {
           <>
             <div className="pos-cart__items">
               {cart.length === 0 && (
-                <p className="pos-cart__empty">No items selected yet — tap a product to add it.</p>
+                <p className="pos-cart__empty">
+                  No items selected yet — tap a product to add it.
+                </p>
               )}
               {cart.map((item) => (
                 <div key={item.cartId} className="pos-cart-item">
@@ -298,7 +311,9 @@ export const AdminPointOfSale = () => {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p className="admin-cell-title">{item.name}</p>
                     <p className="admin-cell-sub">{currency(item.price)}</p>
-                    {item.notes && <p className="pos-cart-item__notes">"{item.notes}"</p>}
+                    {item.notes && (
+                      <p className="pos-cart-item__notes">"{item.notes}"</p>
+                    )}
                   </div>
                   <div className="pos-cart-item__actions">
                     <div style={{ display: "flex", gap: 2 }}>
@@ -318,11 +333,17 @@ export const AdminPointOfSale = () => {
                       </button>
                     </div>
                     <div className="admin-stepper">
-                      <button onClick={() => adjustCartQty(item.cartId, -1)}>−</button>
+                      <button onClick={() => adjustCartQty(item.cartId, -1)}>
+                        −
+                      </button>
                       <span className="admin-stepper__value">{item.qty}</span>
-                      <button onClick={() => adjustCartQty(item.cartId, 1)}>+</button>
+                      <button onClick={() => adjustCartQty(item.cartId, 1)}>
+                        +
+                      </button>
                     </div>
-                    <span className="pos-cart-item__total">{currency(item.qty * item.price)}</span>
+                    <span className="pos-cart-item__total">
+                      {currency(item.qty * item.price)}
+                    </span>
                   </div>
                 </div>
               ))}
@@ -355,7 +376,10 @@ export const AdminPointOfSale = () => {
                   value={promoCode}
                   onChange={(e) => setPromoCode(e.target.value)}
                 />
-                <button className="admin-btn admin-btn--outline" onClick={applyPromo}>
+                <button
+                  className="admin-btn admin-btn--outline"
+                  onClick={applyPromo}
+                >
                   Apply
                 </button>
               </div>
@@ -393,25 +417,41 @@ export const AdminPointOfSale = () => {
         {modal.product && (
           <div>
             <div className="pos-modal-media">{modal.product.media}</div>
-            <p className="admin-cell-title" style={{ fontSize: 15 }}>{modal.product.name}</p>
-            <p className="admin-cell-sub" style={{ marginBottom: 0 }}>{modal.product.category}</p>
-            <p className="pos-modal-price">{currency(Number(modal.product.price))}</p>
+            <p className="admin-cell-title" style={{ fontSize: 15 }}>
+              {modal.product.name}
+            </p>
+            <p className="admin-cell-sub" style={{ marginBottom: 0 }}>
+              {modal.product.category}
+            </p>
+            <p className="pos-modal-price">
+              {currency(Number(modal.product.price))}
+            </p>
 
             <textarea
               className="admin-input"
               rows={2}
               placeholder="Add notes to this item (e.g. no sugar, gift-wrapped)…"
               value={modal.notes}
-              onChange={(e) => setModal((m) => ({ ...m, notes: e.target.value }))}
+              onChange={(e) =>
+                setModal((m) => ({ ...m, notes: e.target.value }))
+              }
               style={{ marginBottom: 16, resize: "vertical" }}
             />
 
             <div className="pos-modal-qty">
-              <button onClick={() => setModal((m) => ({ ...m, qty: Math.max(1, m.qty - 1) }))}>
+              <button
+                onClick={() =>
+                  setModal((m) => ({ ...m, qty: Math.max(1, m.qty - 1) }))
+                }
+              >
                 −
               </button>
               <span className="pos-modal-qty__value">{modal.qty}</span>
-              <button onClick={() => setModal((m) => ({ ...m, qty: m.qty + 1 }))}>+</button>
+              <button
+                onClick={() => setModal((m) => ({ ...m, qty: m.qty + 1 }))}
+              >
+                +
+              </button>
             </div>
 
             <button

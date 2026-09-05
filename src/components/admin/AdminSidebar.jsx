@@ -10,6 +10,7 @@ import {
   LogOut,
   Palette,
 } from "lucide-react";
+import { useAdminAuth } from "../../auth/AdminAuth";
 
 const NAV_GROUPS = [
   {
@@ -40,9 +41,10 @@ const navClass = ({ isActive }) =>
 
 export const AdminSidebar = () => {
   const navigate = useNavigate();
+  const { logout } = useAdminAuth();
 
-  const handleLogout = () => {
-    sessionStorage.removeItem("aa-admin-session");
+  const handleLogout = async () => {
+    await logout();
     navigate("/admin/login", { replace: true });
   };
 

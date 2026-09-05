@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Search,
   Mail,
@@ -10,21 +10,24 @@ import {
 } from "lucide-react";
 import { StatusBadge } from "../../components/admin/StatusBadge";
 import { StatCard } from "../../components/admin/StatCard";
-import { mailClubSubscribers as initialSubscribers } from "../../data/mailClubSubscribers";
+import { api, formatDate, normalizeStatus } from "../../api/client";
 
 const FILTERS = ["all", "active", "paused", "past_due", "cancelled"];
 
 export const AdminMailClub = () => {
-  // Local state seeded from static data — swap for a real
-  // `GET /api/mail-club/subscribers` fetch when the API exists.
-  const [subscribers, setSubscribers] = useState(initialSubscribers);
+  const [subscribers, setSubscribers] = useState([]);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    api.admin.subscribers().then(({ subscribers: responseSubscribers }) => setSubscribers(responseSubscribers)).catch((requestError) => setError(requestError.message));
+  }, []);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return subscribers.filter((s) => {
-      const matchesFilter = filter === "all" || s.status === filter;
+      const matchesFilter = filter === "all" || normalizeStatus(s.status) === filter;
       const matchesQuery =
         !q ||
         s.name.toLowerCase().includes(q) ||
@@ -33,17 +36,14 @@ export const AdminMailClub = () => {
     });
   }, [subscribers, query, filter]);
 
-  const active = subscribers.filter((s) => s.status === "active").length;
+  const active = subscribers.filter((s) => normalizeStatus(s.status) === "active").length;
   const mrr = active * 12;
 
-  const toggleStatus = (id) => {
-    setSubscribers((prev) =>
-      prev.map((s) =>
-        s.id === id
-          ? { ...s, status: s.status === "active" ? "paused" : "active" }
-          : s,
-      ),
-    );
+  const toggleStatus = async (id, status) => {
+    try {
+      const { subscriber } = await api.admin.updateSubscriberStatus(id, normalizeStatus(status) === "active" ? "PAUSED" : "ACTIVE");
+      setSubscribers((prev) => prev.map((item) => item.id === id ? subscriber : item));
+    } catch (requestError) { setError(requestError.message); }
   };
 
   return (
@@ -69,6 +69,7 @@ export const AdminMailClub = () => {
           icon={PauseCircle}
         />
       </div>
+      {error && <p className="admin-page-sub" role="alert">{error}</p>}
 
       <div className="admin-toolbar">
         <div className="admin-search-input">
@@ -118,14 +119,14 @@ export const AdminMailClub = () => {
                     <p className="admin-cell-sub">{s.email}</p>
                   </td>
                   <td className="admin-hide-sm admin-cell-muted">
-                    {s.joinDate}
+                    {formatDate(s.joinDate)}
                   </td>
                   <td className="admin-hide-md admin-cell-muted">
-                    {s.nextBilling}
+                    {formatDate(s.nextBilling)}
                   </td>
                   <td>{s.envelopesSent}</td>
                   <td>
-                    <StatusBadge status={s.status} />
+                    <StatusBadge status={normalizeStatus(s.status)} />
                   </td>
                   <td>
                     <div
@@ -143,10 +144,10 @@ export const AdminMailClub = () => {
                         <Mail size={15} />
                       </a>
                       <button
-                        onClick={() => toggleStatus(s.id)}
+                        onClick={() => toggleStatus(s.id, s.status)}
                         className="admin-icon-btn"
                         aria-label={
-                          s.status === "active"
+                          normalizeStatus(s.status) === "active"
                             ? "Pause subscription"
                             : "Resume subscription"
                         }

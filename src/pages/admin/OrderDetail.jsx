@@ -1,20 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Mail, Truck } from "lucide-react";
 import { StatusBadge } from "../../components/admin/StatusBadge";
-import { orders } from "../../data/orders";
+import { api, asNumber, formatDate, normalizeStatus } from "../../api/client";
 
 const STATUS_STEPS = ["pending", "processing", "shipped", "delivered"];
-const currency = (n) => `$${n.toLocaleString()}`;
+const currency = (n) => `$${asNumber(n).toLocaleString()}`;
 
 export const AdminOrderDetail = () => {
   const { orderId } = useParams();
-  const order = orders.find((o) => o.id === orderId);
+  const [order, setOrder] = useState(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  // Local-only status control — wire this up to a real mutation
-  // (e.g. `PATCH /api/orders/:id`) once the API exists.
-  const [status, setStatus] = useState(order?.status);
+  useEffect(() => {
+    api.admin.order(orderId).then(({ order: responseOrder }) => setOrder(responseOrder)).catch((requestError) => setError(requestError.message)).finally(() => setLoading(false));
+  }, [orderId]);
 
+  if (loading) return null;
   if (!order) {
     return (
       <div>
@@ -32,7 +35,13 @@ export const AdminOrderDetail = () => {
     );
   }
 
-  const subtotal = order.items.reduce((sum, i) => sum + i.qty * i.price, 0);
+  const subtotal = order.items.reduce((sum, item) => sum + item.qty * asNumber(item.price), 0);
+  const updateStatus = async (status) => {
+    try {
+      const { order: updatedOrder } = await api.admin.updateOrderStatus(order.code, status.toUpperCase());
+      setOrder(updatedOrder);
+    } catch (requestError) { setError(requestError.message); }
+  };
 
   return (
     <div>
@@ -62,14 +71,14 @@ export const AdminOrderDetail = () => {
         }}
       >
         <div>
-          <h2 style={{ fontSize: 20 }}>{order.id}</h2>
+          <h2 style={{ fontSize: 20 }}>{order.code}</h2>
           <p className="admin-page-sub" style={{ marginBottom: 0 }}>
-            Placed {order.date}
+            Placed {formatDate(order.createdAt)}
           </p>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
-          <StatusBadge status={order.payment} />
-          <StatusBadge status={status} />
+          <StatusBadge status={normalizeStatus(order.payment)} />
+          <StatusBadge status={normalizeStatus(order.status)} />
         </div>
       </div>
 
@@ -89,7 +98,7 @@ export const AdminOrderDetail = () => {
                     </p>
                   </div>
                   <span style={{ fontWeight: 600 }}>
-                    {currency(item.qty * item.price)}
+                    {currency(item.qty * asNumber(item.price))}
                   </span>
                 </div>
               ))}
@@ -116,17 +125,17 @@ export const AdminOrderDetail = () => {
               {STATUS_STEPS.map((s) => (
                 <button
                   key={s}
-                  onClick={() => setStatus(s)}
-                  className={`admin-pill${status === s ? " is-active" : ""}`}
+                  onClick={() => updateStatus(s)}
+                  className={`admin-pill${normalizeStatus(order.status) === s ? " is-active" : ""}`}
                 >
                   {s}
                 </button>
               ))}
               <button
-                onClick={() => setStatus("cancelled")}
+                onClick={() => updateStatus("cancelled")}
                 className="admin-pill"
                 style={
-                  status === "cancelled"
+                  normalizeStatus(order.status) === "cancelled"
                     ? {
                         background: "#b3261e",
                         color: "#fff",
@@ -146,12 +155,12 @@ export const AdminOrderDetail = () => {
             <h3 className="admin-panel__title" style={{ marginBottom: 10 }}>
               Customer
             </h3>
-            <p className="admin-cell-title">{order.customer.name}</p>
+            <p className="admin-cell-title">{order.customerName}</p>
             <p className="admin-cell-sub" style={{ marginBottom: 10 }}>
-              {order.customer.email}
+              {order.customerEmail}
             </p>
             <a
-              href={`mailto:${order.customer.email}`}
+              href={`mailto:${order.customerEmail}`}
               className="admin-mail-link"
             >
               <Mail size={13} /> Email customer
@@ -176,6 +185,7 @@ export const AdminOrderDetail = () => {
           </div>
         </div>
       </div>
+      {error && <p className="admin-page-sub" role="alert">{error}</p>}
     </div>
   );
 };

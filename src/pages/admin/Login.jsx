@@ -1,21 +1,31 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LogIn, Palette } from "lucide-react";
+import { LogIn } from "lucide-react";
 // import Image from "next/image";
 import "../../AdminApp.css";
 import { mascot } from "../../assets/mascot";
+import { useAdminAuth } from "../../auth/AdminAuth";
 
 export const AdminLogin = () => {
   const navigate = useNavigate();
+  const { login } = useAdminAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // No real auth yet — swap this for a call to your auth endpoint and
-    // store the returned session/token instead of this local flag.
-    sessionStorage.setItem("aa-admin-session", "1");
-    navigate("/admin", { replace: true });
+    setSubmitting(true);
+    setError("");
+    try {
+      await login({ email, password });
+      navigate("/admin", { replace: true });
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -45,6 +55,7 @@ export const AdminLogin = () => {
         <p className="admin-login__sub">
           Manage orders, stock, events, and the Mail Club.
         </p>
+        {error && <p className="admin-login__sub" role="alert">{error}</p>}
 
         <label className="admin-login__field">
           <span className="admin-login__label">Email</span>
@@ -80,9 +91,9 @@ export const AdminLogin = () => {
           </a>
         </div>
 
-        <button type="submit" className="admin-login__submit">
+        <button type="submit" className="admin-login__submit" disabled={submitting}>
           <LogIn size={16} />
-          Log in
+          {submitting ? "Logging in..." : "Log in"}
         </button>
 
         <p className="admin-login__footer">

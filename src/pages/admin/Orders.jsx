@@ -1,8 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Search, Download, ChevronRight } from "lucide-react";
 import { StatusBadge } from "../../components/admin/StatusBadge";
-import { orders as allOrders } from "../../data/orders";
+import { api, asNumber, formatDate, normalizeStatus } from "../../api/client";
 
 const FILTERS = [
   "all",
@@ -12,24 +12,30 @@ const FILTERS = [
   "delivered",
   "cancelled",
 ];
-const currency = (n) => `$${n.toLocaleString()}`;
+const currency = (n) => `$${asNumber(n).toLocaleString()}`;
 
 export const AdminOrders = () => {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
+  const [orders, setOrders] = useState([]);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    api.admin.orders().then(({ orders: responseOrders }) => setOrders(responseOrders)).catch((requestError) => setError(requestError.message));
+  }, []);
 
   const filtered = useMemo(() => {
-    return allOrders.filter((o) => {
-      const matchesFilter = filter === "all" || o.status === filter;
+    return orders.filter((o) => {
+      const matchesFilter = filter === "all" || normalizeStatus(o.status) === filter;
       const q = query.trim().toLowerCase();
       const matchesQuery =
         !q ||
-        o.id.toLowerCase().includes(q) ||
-        o.customer.name.toLowerCase().includes(q) ||
-        o.customer.email.toLowerCase().includes(q);
+        o.code.toLowerCase().includes(q) ||
+        o.customerName.toLowerCase().includes(q) ||
+        (o.customerEmail || "").toLowerCase().includes(q);
       return matchesFilter && matchesQuery;
     });
-  }, [query, filter]);
+  }, [orders, query, filter]);
 
   return (
     <div>
@@ -47,6 +53,7 @@ export const AdminOrders = () => {
           Export
         </button>
       </div>
+      {error && <p className="admin-page-sub" role="alert">{error}</p>}
 
       <div className="admin-pillbar">
         {FILTERS.map((f) => (
@@ -79,29 +86,29 @@ export const AdminOrders = () => {
                 <tr key={o.id}>
                   <td>
                     <Link
-                      to={`/admin/orders/${o.id}`}
+                      to={`/admin/orders/${o.code}`}
                       className="admin-cell-title"
                     >
-                      {o.id}
+                      {o.code}
                     </Link>
                   </td>
                   <td>
-                    <p>{o.customer.name}</p>
-                    <p className="admin-cell-sub">{o.customer.email}</p>
+                    <p>{o.customerName}</p>
+                    <p className="admin-cell-sub">{o.customerEmail}</p>
                   </td>
-                  <td className="admin-hide-sm admin-cell-muted">{o.date}</td>
+                  <td className="admin-hide-sm admin-cell-muted">{formatDate(o.createdAt)}</td>
                   <td className="admin-hide-md">
-                    <StatusBadge status={o.payment} />
+                    <StatusBadge status={normalizeStatus(o.payment)} />
                   </td>
                   <td>
-                    <StatusBadge status={o.status} />
+                    <StatusBadge status={normalizeStatus(o.status)} />
                   </td>
                   <td className="admin-align-right" style={{ fontWeight: 600 }}>
                     {currency(o.total)}
                   </td>
                   <td>
                     <Link
-                      to={`/admin/orders/${o.id}`}
+                      to={`/admin/orders/${o.code}`}
                       style={{ display: "flex", justifyContent: "flex-end" }}
                     >
                       <ChevronRight size={16} color="var(--admin-text-faint)" />

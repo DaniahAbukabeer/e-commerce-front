@@ -1,8 +1,9 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { mascot } from "../assets/mascot";
+import { api, asNumber } from "../api/client";
 
-const EVENTS = {
+const EVENT_MEDIA = {
   "linocut-workshop": {
     kicker: "workshop",
     title: "Linocut Printmaking Workshop",
@@ -91,18 +92,26 @@ const PlayIcon = () => (
 
 export const EventDetail = () => {
   const { eventId } = useParams();
-  const event = EVENTS[eventId];
+  const [event, setEvent] = useState(null);
 
   const [selectedDay, setSelectedDay] = useState(0);
   const [selectedTime, setSelectedTime] = useState(null);
   const [booked, setBooked] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
   const carouselRef = useRef(null);
+
+  useEffect(() => {
+    api.store.event(eventId).then(({ event: responseEvent }) => setEvent({ ...responseEvent, ...(EVENT_MEDIA[eventId] || { images: [], videos: [] }) })).catch((requestError) => setError(requestError.message));
+  }, [eventId]);
 
   const activeDay = useMemo(
     () => (event ? event.days[selectedDay] : null),
     [event, selectedDay],
   );
 
+  if (!event && !error) return null;
   if (!event) {
     return (
       <section className="page">
@@ -147,12 +156,12 @@ export const EventDetail = () => {
           <span className="tag">{event.duration}</span>
           <span className="sticky-note">{event.location}</span>
         </div>
-        <SeatMeter total={event.totalSeats} booked={event.bookedSeats} />
+        <SeatMeter total={event.totalSeats} booked={event.totalSeats - event.seatsLeft} />
       </div>
 
       <h2 style={{ marginTop: 40 }}>Gallery</h2>
       <div className="gallery-grid">
-        {event.images.map((label) => (
+          {(event.images || []).map((label) => (
           <div className="gallery-item doodle" key={label}>
             <div className="gallery-item__media">{label}</div>
           </div>
@@ -169,7 +178,7 @@ export const EventDetail = () => {
           ‹
         </button>
         <div className="video-carousel" ref={carouselRef}>
-          {event.videos.map((label) => (
+          {(event.videos || []).map((label) => (
             <div className="video-card doodle" key={label}>
               <div className="video-card__thumb">
                 <PlayIcon />
@@ -231,13 +240,14 @@ export const EventDetail = () => {
             </span>
           </div>
         ) : (
-          <button
-            className="btn btn-primary doodle doodle-tight"
-            disabled={!selectedTime}
-            onClick={() => setBooked(true)}
-          >
-            Reserve your spot {event.price}
-          </button>
+          <form onSubmit={async (e) => { e.preventDefault(); setError(""); try { await api.store.register(event.slug, { name, email, day: `${activeDay.day} ${activeDay.date} ${activeDay.month}`, time: selectedTime }); setBooked(true); } catch (requestError) { setError(requestError.message); } }}>
+            <input required placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} />
+            <input required type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <button className="btn btn-primary doodle doodle-tight" disabled={!selectedTime}>
+              Reserve your spot ${asNumber(event.price)}
+            </button>
+            {error && <p role="alert">{error}</p>}
+          </form>
         )}
       </div>
     </section>

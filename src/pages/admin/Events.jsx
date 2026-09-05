@@ -1,10 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Search, Plus, Users, ChevronRight } from "lucide-react";
 import { StatusBadge } from "../../components/admin/StatusBadge";
 import { Modal } from "../../components/admin/Modal";
 import { Field } from "../../components/admin/Field";
-import { events as initialEvents } from "../../data/events";
+import { api, asNumber, normalizeStatus } from "../../api/client";
 
 const FILTERS = ["all", "upcoming", "draft", "past"];
 const emptyDraft = {
@@ -19,55 +19,39 @@ const emptyDraft = {
 };
 
 export const AdminEvents = () => {
-  // Local state seeded from static data — swap for `GET /api/events` later.
-  const [events, setEvents] = useState(initialEvents);
+  const [events, setEvents] = useState([]);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [draft, setDraft] = useState(emptyDraft);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    api.admin.events().then(({ events: responseEvents }) => setEvents(responseEvents)).catch((requestError) => setError(requestError.message));
+  }, []);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return events.filter((e) => {
-      const matchesFilter = filter === "all" || e.status === filter;
+      const matchesFilter = filter === "all" || normalizeStatus(e.status) === filter;
       const matchesQuery = !q || e.title.toLowerCase().includes(q);
       return matchesFilter && matchesQuery;
     });
   }, [events, query, filter]);
 
-  const addEvent = (e) => {
+  const addEvent = async (e) => {
     e.preventDefault();
     if (!draft.title.trim()) return;
-    const slug = draft.title
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
-    setEvents((prev) => [
-      {
-        id: `evt_${Date.now()}`,
-        slug: slug || `event-${Date.now()}`,
-        title: draft.title,
-        kicker: "workshop",
-        location: draft.location,
-        duration: "2 hours",
-        price: Number(draft.price) || 0,
-        status: "draft",
-        totalSeats: Number(draft.totalSeats) || 10,
-        bookedSeats: 0,
-        days: [
-          {
-            day: draft.day,
-            date: draft.date || "1",
-            month: draft.month || "Oct",
-            slots: draft.time ? [draft.time] : ["10:00am"],
-          },
-        ],
-      },
-      ...prev,
-    ]);
-    setDraft(emptyDraft);
-    setModalOpen(false);
+    try {
+      const { event } = await api.admin.createEvent({
+        title: draft.title, location: draft.location, price: Number(draft.price),
+        totalSeats: Number(draft.totalSeats),
+        days: [{ day: draft.day, date: draft.date || "1", month: draft.month || "Oct", slots: draft.time ? [draft.time] : ["10:00am"] }],
+      });
+      setEvents((prev) => [event, ...prev]);
+      setDraft(emptyDraft);
+      setModalOpen(false);
+    } catch (requestError) { setError(requestError.message); }
   };
 
   return (
@@ -83,12 +67,13 @@ export const AdminEvents = () => {
         </div>
         <button
           onClick={() => setModalOpen(true)}
-          className="admin-btn admin-btn--primary"
+          className="admin-btn admin-btn--primary text-white!"
         >
           <Plus size={16} />
           New event
         </button>
       </div>
+      {error && <p className="admin-page-sub" role="alert">{error}</p>}
 
       <div className="admin-pillbar">
         {FILTERS.map((f) => (
@@ -104,7 +89,7 @@ export const AdminEvents = () => {
 
       <div className="admin-cards-grid">
         {filtered.map((ev) => {
-          const pct = Math.round((ev.bookedSeats / ev.totalSeats) * 100);
+          const pct = Math.round((asNumber(ev.bookedSeats) / ev.totalSeats) * 100);
           return (
             <Link
               key={ev.id}
@@ -130,7 +115,7 @@ export const AdminEvents = () => {
 
               <div className="admin-event-card__row">
                 <StatusBadge
-                  status={ev.bookedSeats >= ev.totalSeats ? "full" : ev.status}
+                  status={ev.bookedSeats >= ev.totalSeats ? "full" : normalizeStatus(ev.status)}
                 />
                 <span className="admin-event-card__price">${ev.price}</span>
               </div>
@@ -177,7 +162,7 @@ export const AdminEvents = () => {
             >
               Cancel
             </button>
-            <button onClick={addEvent} className="admin-btn admin-btn--primary">
+            <button onClick={addEvent} className="admin-btn admin-btn--primary text-white!">
               Create event
             </button>
           </>

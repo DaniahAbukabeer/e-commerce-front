@@ -1,6 +1,7 @@
 import { useLocation } from "react-router-dom";
 import { Bell, Search, Menu } from "lucide-react";
 import { mascot } from "../../assets/mascot";
+import { useAdminAuth } from "../../auth/AdminAuth";
 
 const TITLES = [
   { match: /^\/admin\/pos/, title: "Point of Sale" },
@@ -13,6 +14,7 @@ const TITLES = [
 
 export const AdminTopbar = ({ onMenuClick }) => {
   const { pathname } = useLocation();
+  const { user } = useAdminAuth();
   const title = TITLES.find((t) => t.match.test(pathname))?.title ?? "Dashboard";
 
   return (
@@ -36,8 +38,8 @@ export const AdminTopbar = ({ onMenuClick }) => {
       <div className="admin-user">
         <img src={mascot.hello} alt="" />
         <div className="admin-user__meta">
-          <p className="admin-user__name">Studio Admin</p>
-          <p className="admin-user__role">Owner</p>
+          <p className="admin-user__name">{user?.name}</p>
+          <p className="admin-user__role">{user?.role?.toLowerCase()}</p>
         </div>
       </div>
     </header>

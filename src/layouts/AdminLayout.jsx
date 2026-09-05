@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Navigate, NavLink, Outlet, useLocation } from "react-router-dom";
+import { useState } from "react";
+import { Navigate, NavLink, Outlet } from "react-router-dom";
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -13,6 +13,7 @@ import {
 import "../AdminApp.css";
 import { AdminSidebar } from "../components/admin/AdminSidebar";
 import { AdminTopbar } from "../components/admin/AdminTopbar";
+import { useAdminAuth } from "../auth/AdminAuth";
 
 const MOBILE_NAV = [
   { to: "/admin", end: true, label: "Dashboard", icon: LayoutDashboard },
@@ -28,16 +29,10 @@ const navClass = ({ isActive }) =>
 
 export default function AdminLayout() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const { pathname } = useLocation();
+  const { user, loading } = useAdminAuth();
 
-  useEffect(() => {
-    setMobileNavOpen(false);
-  }, [pathname]);
-
-  // No real auth yet — swap this for a real session/token check once the
-  // API exists. For now it just gates on the flag Login.jsx sets.
-  const isAuthed = sessionStorage.getItem("aa-admin-session") === "1";
-  if (!isAuthed) {
+  if (loading) return null;
+  if (!user) {
     return <Navigate to="/admin/login" replace />;
   }
 
@@ -71,7 +66,7 @@ export default function AdminLayout() {
               </div>
               <nav className="admin-nav">
                 {MOBILE_NAV.map(({ to, end, label, icon: Icon }) => (
-                  <NavLink key={to} to={to} end={end} className={navClass}>
+                  <NavLink key={to} to={to} end={end} className={navClass} onClick={() => setMobileNavOpen(false)}>
                     <Icon size={16} strokeWidth={2} />
                     {label}
                   </NavLink>

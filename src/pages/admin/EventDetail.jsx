@@ -1,15 +1,24 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Users, Mail, Trash2 } from "lucide-react";
 import { StatusBadge } from "../../components/admin/StatusBadge";
-import { events } from "../../data/events";
-import { registrants as allRegistrants } from "../../data/registrants";
+import { api, asNumber, normalizeStatus } from "../../api/client";
 
 export const AdminEventDetail = () => {
   const { eventId } = useParams();
-  const event = events.find((e) => e.slug === eventId);
-  const [roster, setRoster] = useState(allRegistrants[eventId] || []);
+  const [event, setEvent] = useState(null);
+  const [roster, setRoster] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
+  useEffect(() => {
+    api.admin.event(eventId).then(({ event: responseEvent }) => {
+      setEvent(responseEvent);
+      setRoster(responseEvent.registrants || []);
+    }).catch((requestError) => setError(requestError.message)).finally(() => setLoading(false));
+  }, [eventId]);
+
+  if (loading) return null;
   if (!event) {
     return (
       <div>
@@ -33,8 +42,12 @@ export const AdminEventDetail = () => {
   }
 
   const seatsBooked = roster.reduce((sum, r) => sum + r.seats, 0);
-  const removeRegistrant = (id) =>
-    setRoster((prev) => prev.filter((r) => r.id !== id));
+  const removeRegistrant = async (id) => {
+    try {
+      await api.admin.deleteRegistrant(event.slug, id);
+      setRoster((prev) => prev.filter((registrant) => registrant.id !== id));
+    } catch (requestError) { setError(requestError.message); }
+  };
 
   return (
     <div>
@@ -70,13 +83,14 @@ export const AdminEventDetail = () => {
             className="admin-page-sub"
             style={{ marginTop: 6, marginBottom: 0 }}
           >
-            {event.location} · {event.duration} · ${event.price}
+            {event.location} · {event.duration} · ${asNumber(event.price)}
           </p>
         </div>
         <StatusBadge
-          status={seatsBooked >= event.totalSeats ? "full" : event.status}
+          status={seatsBooked >= event.totalSeats ? "full" : normalizeStatus(event.status)}
         />
       </div>
+      {error && <p className="admin-page-sub" role="alert">{error}</p>}
 
       <div
         className="admin-grid-stats"

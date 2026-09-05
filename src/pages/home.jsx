@@ -1,7 +1,21 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { mascot } from "../assets/mascot";
+import { api, asNumber } from "../api/client";
 
 export const Home = () => {
+  const [events, setEvents] = useState([]);
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    Promise.all([api.store.events(), api.store.products()])
+      .then(([eventsResponse, productsResponse]) => {
+        setEvents(eventsResponse.events.slice(0, 2));
+        setProducts(productsResponse.products.slice(0, 3));
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <section className="page">
       <div className="hero">
@@ -50,43 +64,23 @@ export const Home = () => {
         </div>
       </div>
       <div className="event-grid">
-        <Link to="/events/linocut-workshop" className="event-card doodle">
-          <div className="event-card__date">
-            <span className="event-card__day">Sat</span>
-            <span className="event-card__num">29</span>
-            <span className="event-card__month">Aug</span>
-          </div>
-          <div className="event-card__body">
-            <h3>Linocut Workshop</h3>
-            <p>
-              Carve, ink, and pull your first print all materials included.
-            </p>
-            <div className="event-card__footer">
-              <span className="tag tag--on-dark">$45</span>
-              <span className="sticky-note sticky-note--on-dark">
-                3 spots left
-              </span>
+        {events.map((event) => (
+          <Link key={event.slug} to={`/events/${event.slug}`} className="event-card doodle">
+            <div className="event-card__date">
+              <span className="event-card__day">{event.days[0]?.day}</span>
+              <span className="event-card__num">{event.days[0]?.date}</span>
+              <span className="event-card__month">{event.days[0]?.month}</span>
             </div>
-          </div>
-        </Link>
-
-        <Link to="/events/ceramics-open-studio" className="event-card doodle">
-          <div className="event-card__date">
-            <span className="event-card__day">Sun</span>
-            <span className="event-card__num">30</span>
-            <span className="event-card__month">Aug</span>
-          </div>
-          <div className="event-card__body">
-            <h3>Ceramics Open Studio</h3>
-            <p>Wheel time and glazing, self-directed, staff potter on hand.</p>
-            <div className="event-card__footer">
-              <span className="tag tag--on-dark">$38</span>
-              <span className="sticky-note sticky-note--on-dark">
-                5 spots left
-              </span>
+            <div className="event-card__body">
+              <h3>{event.title}</h3>
+              <p>{event.location} · {event.duration}</p>
+              <div className="event-card__footer">
+                <span className="tag tag--on-dark">${asNumber(event.price)}</span>
+                <span className="sticky-note sticky-note--on-dark">{event.seatsLeft} spots left</span>
+              </div>
             </div>
-          </div>
-        </Link>
+          </Link>
+        ))}
       </div>
 
       <div className="section-head">
@@ -101,33 +95,14 @@ export const Home = () => {
         </Link>
       </div>
       <div className="card-grid">
-        <article className="item-card doodle">
-          <div className="item-card__media">hand-thrown</div>
-          <h3>Speckled Mug</h3>
-          <p>Wheel-thrown stoneware, dipped in a warm oatmeal glaze.</p>
-          <div className="item-card__footer">
-            <span className="tag">$28</span>
-            <span className="sticky-note">new</span>
-          </div>
-        </article>
-
-        <article className="item-card doodle">
-          <div className="item-card__media">risograph</div>
-          <h3>Sunday Market Print</h3>
-          <p>Two-colour riso print, edition of 50, signed on the back.</p>
-          <div className="item-card__footer">
-            <span className="tag">$18</span>
-          </div>
-        </article>
-
-        <article className="item-card doodle">
-          <div className="item-card__media">hand-thrown</div>
-          <h3>Clay Bud Vase</h3>
-          <p>Small enough for one stem, or three.</p>
-          <div className="item-card__footer">
-            <span className="tag">$22</span>
-          </div>
-        </article>
+        {products.map((product) => (
+          <article key={product.id} className="item-card doodle">
+            <div className="item-card__media">{product.media}</div>
+            <h3>{product.name}</h3>
+            <p>{product.category}</p>
+            <div className="item-card__footer"><span className="tag">${asNumber(product.price)}</span></div>
+          </article>
+        ))}
       </div>
 
       <Link to="/mail-club" className="mail-club-band doodle">
