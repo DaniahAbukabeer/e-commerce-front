@@ -10,6 +10,7 @@ import { NotFound } from "./pages/not-found";
 import AdminLayout from "./layouts/AdminLayout";
 import { AdminLogin } from "./pages/admin/Login";
 import { AdminDashboard } from "./pages/admin/Dashboard";
+import { AdminPointOfSale } from "./pages/admin/PointOfSale";
 import { AdminOrders } from "./pages/admin/Orders";
 import { AdminOrderDetail } from "./pages/admin/OrderDetail";
 import { AdminStock } from "./pages/admin/Stock";
@@ -32,6 +33,7 @@ function App() {
 
         <Route path="admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
+          <Route path="pos" element={<AdminPointOfSale />} />
           <Route path="orders" element={<AdminOrders />} />
           <Route path="orders/:orderId" element={<AdminOrderDetail />} />
           <Route path="stock" element={<AdminStock />} />

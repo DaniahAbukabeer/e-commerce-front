@@ -5,6 +5,7 @@ import {
   Package,
   CalendarDays,
   Mail,
+  Store,
   ArrowLeft,
   LogOut,
   Palette,
@@ -20,6 +21,7 @@ const NAV_GROUPS = [
   {
     label: "Sales",
     items: [
+      { to: "/admin/pos", label: "Point of Sale", icon: Store },
       { to: "/admin/orders", label: "Orders", icon: ShoppingBag },
       { to: "/admin/stock", label: "Stock", icon: Package },
     ],

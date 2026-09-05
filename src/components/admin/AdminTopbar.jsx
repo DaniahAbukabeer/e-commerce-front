@@ -3,6 +3,7 @@ import { Bell, Search, Menu } from "lucide-react";
 import { mascot } from "../../assets/mascot";
 
 const TITLES = [
+  { match: /^\/admin\/pos/, title: "Point of Sale" },
   { match: /^\/admin\/orders/, title: "Orders" },
   { match: /^\/admin\/stock/, title: "Stock" },
   { match: /^\/admin\/events/, title: "Events" },
@@ -12,16 +13,11 @@ const TITLES = [
 
 export const AdminTopbar = ({ onMenuClick }) => {
   const { pathname } = useLocation();
-  const title =
-    TITLES.find((t) => t.match.test(pathname))?.title ?? "Dashboard";
+  const title = TITLES.find((t) => t.match.test(pathname))?.title ?? "Dashboard";
 
   return (
     <header className="admin-topbar">
-      <button
-        className="admin-topbar__menu-btn"
-        onClick={onMenuClick}
-        aria-label="Open menu"
-      >
+      <button className="admin-topbar__menu-btn" onClick={onMenuClick} aria-label="Open menu">
         <Menu size={20} />
       </button>
 

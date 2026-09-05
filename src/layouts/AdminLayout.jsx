@@ -6,6 +6,7 @@ import {
   Package,
   CalendarDays,
   Mail,
+  Store,
   X,
   Palette,
 } from "lucide-react";
@@ -15,6 +16,7 @@ import { AdminTopbar } from "../components/admin/AdminTopbar";
 
 const MOBILE_NAV = [
   { to: "/admin", end: true, label: "Dashboard", icon: LayoutDashboard },
+  { to: "/admin/pos", label: "Point of Sale", icon: Store },
   { to: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { to: "/admin/stock", label: "Stock", icon: Package },
   { to: "/admin/events", label: "Events", icon: CalendarDays },

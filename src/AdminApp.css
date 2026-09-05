@@ -1432,3 +1432,360 @@ a.admin-list__row:hover {
   background: #fdecec;
   color: #b3261e;
 }
+
+/* ============================================================
+   POINT OF SALE
+   ============================================================ */
+
+.pos-shell {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .pos-shell {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pos-categories {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  margin-bottom: 16px;
+}
+
+.pos-category {
+  flex: 0 0 auto;
+  width: 104px;
+  padding: 12px 8px;
+  border-radius: 14px;
+  border: 1.5px solid var(--admin-border);
+  background: var(--admin-surface);
+  text-align: center;
+  cursor: pointer;
+}
+
+.pos-category:hover {
+  border-color: #cdd2d9;
+}
+
+.pos-category.is-active {
+  border-color: var(--admin-accent);
+  background: var(--admin-accent-soft);
+}
+
+.pos-category__icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--admin-bg);
+  color: var(--admin-text-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 8px;
+}
+
+.pos-category.is-active .pos-category__icon {
+  background: #fff;
+  color: var(--admin-accent);
+}
+
+.pos-category__label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--admin-text);
+  display: block;
+}
+
+.pos-category__count {
+  font-size: 11px;
+  color: var(--admin-text-faint);
+  display: block;
+  margin-top: 2px;
+}
+
+.pos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.pos-card {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: var(--admin-surface);
+  border: 1.5px solid var(--admin-border);
+  border-radius: 14px;
+  padding: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  position: relative;
+}
+
+.pos-card:hover {
+  border-color: #cdd2d9;
+}
+
+.pos-card:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pos-card__media {
+  height: 92px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--admin-bg), #ececec);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11.5px;
+  color: var(--admin-text-faint);
+  text-transform: capitalize;
+  margin-bottom: 10px;
+  text-align: center;
+  padding: 0 8px;
+}
+
+.pos-card__name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--admin-text);
+  margin-bottom: 6px;
+  line-height: 1.25;
+}
+
+.pos-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.pos-card__tag {
+  font-size: 10.5px;
+  color: var(--admin-text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.pos-card__price {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--admin-text);
+}
+
+.pos-card__badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--admin-accent);
+  border-radius: 999px;
+  padding: 1px 7px;
+}
+
+.pos-card__oos {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #b3261e;
+  background: #fdecec;
+  border-radius: 999px;
+  padding: 2px 8px;
+  text-transform: uppercase;
+}
+
+/* cart panel */
+.pos-cart {
+  position: sticky;
+  top: 84px;
+}
+
+.pos-cart__header {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.pos-cart__title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.pos-cart__subtitle {
+  font-size: 12px;
+  color: var(--admin-text-faint);
+  margin-top: 2px;
+}
+
+.pos-cart__meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.pos-cart__items {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.pos-cart__empty {
+  padding: 44px 20px;
+  text-align: center;
+  color: var(--admin-text-faint);
+  font-size: 13px;
+}
+
+.pos-cart-item {
+  display: flex;
+  gap: 10px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--admin-border-soft);
+  align-items: flex-start;
+}
+
+.pos-cart-item__media {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  border-radius: 8px;
+  background: var(--admin-bg);
+}
+
+.pos-cart-item__notes {
+  font-size: 11.5px;
+  color: var(--admin-text-faint);
+  font-style: italic;
+  margin-top: 2px;
+}
+
+.pos-cart-item__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.pos-cart-item__total {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--admin-text);
+}
+
+.pos-cart__summary {
+  padding: 16px 18px;
+}
+
+.pos-summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 8px;
+  color: var(--admin-text-soft);
+}
+
+.pos-summary-row--total {
+  border-top: 1px dashed var(--admin-border);
+  margin-top: 6px;
+  padding-top: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--admin-text);
+}
+
+.pos-promo-row {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.pos-payment-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.pos-payment-row .admin-pill {
+  flex: 1;
+  text-align: center;
+}
+
+.pos-place-btn {
+  width: 100%;
+  justify-content: center;
+}
+
+.pos-success {
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.pos-success__code {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--admin-accent);
+  margin: 8px 0 18px;
+}
+
+/* modal contents */
+.pos-modal-media {
+  height: 160px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--admin-bg), #ececec);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--admin-text-faint);
+  font-size: 13px;
+  text-transform: capitalize;
+  margin-bottom: 14px;
+}
+
+.pos-modal-price {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--admin-text);
+  margin: 6px 0 14px;
+}
+
+.pos-modal-qty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.pos-modal-qty button {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1.5px solid var(--admin-border);
+  background: #fff;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.pos-modal-qty button:hover {
+  background: var(--admin-bg);
+}
+
+.pos-modal-qty__value {
+  font-size: 17px;
+  font-weight: 700;
+  min-width: 24px;
+  text-align: center;
+}

@@ -89,7 +89,7 @@ export const AdminStock = () => {
         </div>
         <button
           onClick={() => setModalOpen(true)}
-          className="admin-btn admin-btn--primary"
+          className="admin-btn admin-btn--primary text-white!"
         >
           <Plus size={16} />
           Add product
@@ -188,7 +188,7 @@ export const AdminStock = () => {
             </button>
             <button
               onClick={addProduct}
-              className="admin-btn admin-btn--primary"
+              className="admin-btn admin-btn--primary text-white!"
             >
               Add product
             </button>
