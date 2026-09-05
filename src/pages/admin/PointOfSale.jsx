@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   LayoutGrid,
   Coffee,
@@ -10,9 +10,10 @@ import {
   ReceiptText,
 } from "lucide-react";
 import { Modal } from "../../components/admin/Modal";
-import { products as initialProducts } from "../../data/products";
+import { api, asNumber, normalizeStatus } from "../../api/client";
+import { LoadingScreen } from "../../components/LoadingScreen";
 
-const currency = (n) => `$${n.toFixed(2)}`;
+const currency = (n) => `$${asNumber(n).toFixed(2)}`;
 
 const CATEGORY_ICONS = {
   All: LayoutGrid,
@@ -29,12 +30,7 @@ const emptyModalState = {
 };
 
 export const AdminPointOfSale = () => {
-  // Seeded from the same static product data the Stock page uses. Swap for
-  // `GET /api/products?status=ACTIVE` once the frontend has a real API
-  // client — the backend endpoint for that already exists.
-  const [products, setProducts] = useState(
-    initialProducts.filter((p) => p.status === "ACTIVE"),
-  );
+  const [products, setProducts] = useState([]);
 
   const categories = useMemo(
     () => ["All", ...new Set(products.map((p) => p.category))],
@@ -51,6 +47,17 @@ export const AdminPointOfSale = () => {
   const [promoApplied, setPromoApplied] = useState(false);
   const [modal, setModal] = useState(emptyModalState);
   const [placedOrder, setPlacedOrder] = useState(null); // { code, total }
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    api.admin.products({ status: "ACTIVE" })
+      .then(({ products: responseProducts }) =>
+        setProducts(responseProducts.map((product) => ({ ...product, status: normalizeStatus(product.status) }))),
+      )
+      .catch((requestError) => setError(requestError.message))
+      .finally(() => setLoading(false));
+  }, []);
 
   const filteredProducts = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -138,36 +145,24 @@ export const AdminPointOfSale = () => {
 
   // ---- checkout ----------------------------------------------------
 
-  const placeOrder = () => {
+  const placeOrder = async () => {
     if (cart.length === 0) return;
-    // Local-only for now — wire this up to `POST /api/admin/orders` once the
-    // frontend has an access token to send:
-    //
-    // await fetch(`${API_URL}/api/admin/orders`, {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
-    //   body: JSON.stringify({
-    //     customerName: customerName.trim() || "Walk-in",
-    //     shipping: fulfillment === "Ship to customer" ? "STANDARD" : "PICKUP",
-    //     payment: "PAID",
-    //     items: cart.map((i) => ({ productId: i.productId, qty: i.qty, notes: i.notes || undefined })),
-    //   }),
-    // });
-    // The endpoint resolves prices server-side and decrements stock in the
-    // same transaction, so it can't be tricked into charging less than the
-    // current price or overselling stock.
-    setProducts((prev) =>
-      prev.map((p) => {
-        const sold = cart
-          .filter((i) => i.productId === p.id)
-          .reduce((sum, i) => sum + i.qty, 0);
-        return sold ? { ...p, stock: Math.max(0, p.stock - sold) } : p;
-      }),
-    );
-    setPlacedOrder({
-      code: `AA-${Math.floor(1000 + Math.random() * 9000)}`,
-      total,
-    });
+    try {
+      setError("");
+      const { order } = await api.admin.createOrder({
+        customerName: customerName.trim() || "Walk-in",
+        shipping: fulfillment === "Ship to customer" ? "STANDARD" : "PICKUP",
+        payment: "PAID",
+        items: cart.map(({ productId, qty, notes }) => ({ productId, qty, notes: notes || undefined })),
+      });
+      setProducts((prev) => prev.map((product) => {
+        const sold = cart.filter((item) => item.productId === product.id).reduce((sum, item) => sum + item.qty, 0);
+        return sold ? { ...product, stock: Math.max(0, product.stock - sold) } : product;
+      }));
+      setPlacedOrder({ code: order.code, total: asNumber(order.total) });
+    } catch (requestError) {
+      setError(requestError.message);
+    }
   };
 
   const startNewSale = () => {
@@ -179,8 +174,11 @@ export const AdminPointOfSale = () => {
     setPlacedOrder(null);
   };
 
+  if (loading) return <LoadingScreen inline label="Loading point of sale..." />;
+
   return (
     <div className="pos-shell">
+      {error && <p className="admin-page-sub" role="alert">{error}</p>}
       {/* ---- left: menu ---- */}
       <div>
         <div

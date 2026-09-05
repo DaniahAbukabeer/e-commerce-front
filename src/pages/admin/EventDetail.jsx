@@ -42,7 +42,7 @@ export const AdminEventDetail = () => {
     );
   }
 
-  const seatsBooked = roster.reduce((sum, r) => sum + r.seats, 0);
+  const seatsBooked = roster.reduce((sum, registrant) => sum + (registrant.seats || 0), 0);
   const removeRegistrant = async (id) => {
     try {
       await api.admin.deleteRegistrant(event.slug, id);
@@ -162,7 +162,7 @@ export const AdminEventDetail = () => {
                   </td>
                   <td>{r.seats}</td>
                   <td className="admin-hide-md">
-                    <StatusBadge status={r.payment} />
+                    <StatusBadge status={normalizeStatus(r.payment)} />
                   </td>
                   <td>
                     <div

@@ -11,6 +11,8 @@ const FILTERS = ["all", "upcoming", "draft", "past"];
 const emptyDraft = {
   title: "",
   location: "Studio downstairs",
+  kicker: "workshop",
+  duration: "2 hours",
   price: "",
   totalSeats: "",
   date: "",
@@ -48,7 +50,7 @@ export const AdminEvents = () => {
     if (!draft.title.trim()) return;
     try {
       const { event } = await api.admin.createEvent({
-        title: draft.title, location: draft.location, price: Number(draft.price),
+        title: draft.title, location: draft.location, kicker: draft.kicker, duration: draft.duration, price: Number(draft.price),
         totalSeats: Number(draft.totalSeats),
         days: [{ day: draft.day, date: draft.date || "1", month: draft.month || "Oct", slots: draft.time ? [draft.time] : ["10:00am"] }],
       });
@@ -189,6 +191,24 @@ export const AdminEvents = () => {
               onChange={(e) => setDraft({ ...draft, location: e.target.value })}
             />
           </Field>
+          <div className="admin-field-row">
+            <Field label="Event type">
+              <input
+                className="admin-input"
+                value={draft.kicker}
+                onChange={(e) => setDraft({ ...draft, kicker: e.target.value })}
+                placeholder="workshop"
+              />
+            </Field>
+            <Field label="Duration">
+              <input
+                className="admin-input"
+                value={draft.duration}
+                onChange={(e) => setDraft({ ...draft, duration: e.target.value })}
+                placeholder="2 hours"
+              />
+            </Field>
+          </div>
           <div className="admin-field-row">
             <Field label="Price (USD)">
               <input

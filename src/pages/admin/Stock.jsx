@@ -20,7 +20,10 @@ const emptyDraft = {
   sku: "",
   category: categories[0],
   price: "",
-  stock: "",
+  stock: "0",
+  lowStockThreshold: "10",
+  status: "DRAFT",
+  media: "",
 };
 
 export const AdminStock = () => {
@@ -31,6 +34,7 @@ export const AdminStock = () => {
   const [draft, setDraft] = useState(emptyDraft);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     api.admin.products()
@@ -71,17 +75,25 @@ export const AdminStock = () => {
 
   const addProduct = async (e) => {
     e.preventDefault();
-    if (!draft.name.trim()) return;
+    if (!draft.name.trim() || !draft.sku.trim()) return;
     try {
+      setSubmitting(true);
+      setError("");
       const { product } = await api.admin.createProduct({
-        ...draft,
+        sku: draft.sku.trim(),
+        name: draft.name.trim(),
+        category: draft.category,
         price: Number(draft.price),
         stock: Number(draft.stock) || 0,
+        lowStockThreshold: Number(draft.lowStockThreshold) || 0,
+        status: draft.status,
+        ...(draft.media.trim() ? { media: draft.media.trim() } : {}),
       });
       setProducts((prev) => [{ ...product, status: normalizeStatus(product.status) }, ...prev]);
       setDraft(emptyDraft);
       setModalOpen(false);
     } catch (requestError) { setError(requestError.message); }
+    finally { setSubmitting(false); }
   };
 
   return (
@@ -198,8 +210,9 @@ export const AdminStock = () => {
             <button
               onClick={addProduct}
               className="admin-btn admin-btn--primary text-white!"
+              disabled={submitting}
             >
-              Add product
+              {submitting ? "Adding..." : "Add product"}
             </button>
           </>
         }
@@ -220,6 +233,7 @@ export const AdminStock = () => {
               value={draft.sku}
               onChange={(e) => setDraft({ ...draft, sku: e.target.value })}
               placeholder="AA-CUP-08"
+              required
             />
           </Field>
           <div className="admin-field-row">
@@ -247,16 +261,50 @@ export const AdminStock = () => {
               />
             </Field>
           </div>
-          <Field label="Starting stock">
-            <input
-              type="number"
-              min="0"
-              className="admin-input"
-              value={draft.stock}
-              onChange={(e) => setDraft({ ...draft, stock: e.target.value })}
-              placeholder="20"
-            />
-          </Field>
+          <div className="admin-field-row">
+            <Field label="Starting stock">
+              <input
+                type="number"
+                min="0"
+                step="1"
+                required
+                className="admin-input"
+                value={draft.stock}
+                onChange={(e) => setDraft({ ...draft, stock: e.target.value })}
+              />
+            </Field>
+            <Field label="Low-stock threshold">
+              <input
+                type="number"
+                min="0"
+                step="1"
+                required
+                className="admin-input"
+                value={draft.lowStockThreshold}
+                onChange={(e) => setDraft({ ...draft, lowStockThreshold: e.target.value })}
+              />
+            </Field>
+          </div>
+          <div className="admin-field-row">
+            <Field label="Status">
+              <select
+                className="admin-select"
+                value={draft.status}
+                onChange={(e) => setDraft({ ...draft, status: e.target.value })}
+              >
+                <option value="DRAFT">Draft</option>
+                <option value="ACTIVE">Active</option>
+              </select>
+            </Field>
+            <Field label="Media URL or label (optional)">
+              <input
+                className="admin-input"
+                value={draft.media}
+                onChange={(e) => setDraft({ ...draft, media: e.target.value })}
+                placeholder="https://... or hand-thrown"
+              />
+            </Field>
+          </div>
         </form>
       </Modal>
     </div>

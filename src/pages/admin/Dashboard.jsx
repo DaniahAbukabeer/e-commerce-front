@@ -55,7 +55,7 @@ export const AdminDashboard = () => {
           label="Open orders"
           value={
             orders.filter(
-              (o) => o.status !== "delivered" && o.status !== "cancelled",
+              (order) => !["delivered", "cancelled"].includes(normalizeStatus(order.status)),
             ).length
           }
           delta="+3"

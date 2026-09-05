@@ -67,7 +67,7 @@ export const AdminMailClub = () => {
           label="Paused / past due"
           value={
             subscribers.filter(
-              (s) => s.status === "paused" || s.status === "past_due",
+              (subscriber) => ["paused", "past_due"].includes(normalizeStatus(subscriber.status)),
             ).length
           }
           icon={PauseCircle}
