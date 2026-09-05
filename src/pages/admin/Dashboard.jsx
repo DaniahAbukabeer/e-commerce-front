@@ -11,18 +11,23 @@ import {
 import { StatCard } from "../../components/admin/StatCard";
 import { StatusBadge } from "../../components/admin/StatusBadge";
 import { api, asNumber, formatDate, normalizeStatus } from "../../api/client";
+import { LoadingScreen } from "../../components/LoadingScreen";
 
 const currency = (n) => `$${asNumber(n).toLocaleString()}`;
 
 export const AdminDashboard = () => {
   const [data, setData] = useState({ orders: [], products: [], events: [], subscribers: [] });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([api.admin.orders(), api.admin.products(), api.admin.events(), api.admin.subscribers()])
       .then(([ordersResponse, productsResponse, eventsResponse, subscribersResponse]) => setData({ orders: ordersResponse.orders, products: productsResponse.products, events: eventsResponse.events, subscribers: subscribersResponse.subscribers }))
-      .catch((requestError) => setError(requestError.message));
+        .catch((requestError) => setError(requestError.message))
+        .finally(() => setLoading(false));
   }, []);
+
+      if (loading) return <LoadingScreen inline label="Loading dashboard..." />;
 
   const { orders, products, events, subscribers } = data;
   const revenue = orders

@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { mascot } from "../assets/mascot";
 import { api, asNumber } from "../api/client";
+import { LoadingScreen } from "../components/LoadingScreen";
 
 export const Home = () => {
   const [events, setEvents] = useState([]);
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([api.store.events(), api.store.products()])
@@ -13,8 +15,11 @@ export const Home = () => {
         setEvents(eventsResponse.events.slice(0, 2));
         setProducts(productsResponse.products.slice(0, 3));
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
+
+  if (loading) return <LoadingScreen label="Loading the studio..." />;
 
   return (
     <section className="page">

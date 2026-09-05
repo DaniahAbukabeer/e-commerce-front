@@ -4,6 +4,7 @@ import { StatusBadge } from "../../components/admin/StatusBadge";
 import { Modal } from "../../components/admin/Modal";
 import { Field } from "../../components/admin/Field";
 import { api, asNumber, normalizeStatus } from "../../api/client";
+import { LoadingScreen } from "../../components/LoadingScreen";
 
 const currency = (n) => `$${asNumber(n).toLocaleString()}`;
 const categories = ["Ceramics", "Prints", "Textiles"];
@@ -29,13 +30,15 @@ export const AdminStock = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [draft, setDraft] = useState(emptyDraft);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     api.admin.products()
       .then(({ products: responseProducts }) =>
         setProducts(responseProducts.map((product) => ({ ...product, status: normalizeStatus(product.status) }))),
       )
-      .catch((requestError) => setError(requestError.message));
+        .catch((requestError) => setError(requestError.message))
+        .finally(() => setLoading(false));
   }, []);
 
   const filtered = useMemo(() => {
@@ -49,6 +52,8 @@ export const AdminStock = () => {
       return matchesQuery && matchesCategory;
     });
   }, [products, query, category]);
+
+  if (loading) return <LoadingScreen inline label="Loading stock..." />;
 
   const updateStock = async (id, delta) => {
     try {

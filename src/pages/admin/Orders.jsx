@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Search, Download, ChevronRight } from "lucide-react";
 import { StatusBadge } from "../../components/admin/StatusBadge";
 import { api, asNumber, formatDate, normalizeStatus } from "../../api/client";
+import { LoadingScreen } from "../../components/LoadingScreen";
 
 const FILTERS = [
   "all",
@@ -19,9 +20,10 @@ export const AdminOrders = () => {
   const [filter, setFilter] = useState("all");
   const [orders, setOrders] = useState([]);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.admin.orders().then(({ orders: responseOrders }) => setOrders(responseOrders)).catch((requestError) => setError(requestError.message));
+    api.admin.orders().then(({ orders: responseOrders }) => setOrders(responseOrders)).catch((requestError) => setError(requestError.message)).finally(() => setLoading(false));
   }, []);
 
   const filtered = useMemo(() => {
@@ -36,6 +38,8 @@ export const AdminOrders = () => {
       return matchesFilter && matchesQuery;
     });
   }, [orders, query, filter]);
+
+  if (loading) return <LoadingScreen inline label="Loading orders..." />;
 
   return (
     <div>

@@ -1,0 +1,13 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# React Router does client-side routing — without this, refreshing (or
+# directly visiting) any non-root URL like /admin or /shop returns Netlify's
+# real 404 page instead of loading the app and letting the router take over.
+# This tells Netlify: for any path that isn't a real file, serve index.html
+# and let index.html's JS bundle handle routing itself.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

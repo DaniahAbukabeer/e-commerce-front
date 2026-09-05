@@ -5,6 +5,7 @@ import { StatusBadge } from "../../components/admin/StatusBadge";
 import { Modal } from "../../components/admin/Modal";
 import { Field } from "../../components/admin/Field";
 import { api, asNumber, normalizeStatus } from "../../api/client";
+import { LoadingScreen } from "../../components/LoadingScreen";
 
 const FILTERS = ["all", "upcoming", "draft", "past"];
 const emptyDraft = {
@@ -25,9 +26,10 @@ export const AdminEvents = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [draft, setDraft] = useState(emptyDraft);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.admin.events().then(({ events: responseEvents }) => setEvents(responseEvents)).catch((requestError) => setError(requestError.message));
+    api.admin.events().then(({ events: responseEvents }) => setEvents(responseEvents)).catch((requestError) => setError(requestError.message)).finally(() => setLoading(false));
   }, []);
 
   const filtered = useMemo(() => {
@@ -38,6 +40,8 @@ export const AdminEvents = () => {
       return matchesFilter && matchesQuery;
     });
   }, [events, query, filter]);
+
+  if (loading) return <LoadingScreen inline label="Loading events..." />;
 
   const addEvent = async (e) => {
     e.preventDefault();

@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Mail, Truck } from "lucide-react";
 import { StatusBadge } from "../../components/admin/StatusBadge";
 import { api, asNumber, formatDate, normalizeStatus } from "../../api/client";
+import { LoadingScreen } from "../../components/LoadingScreen";
 
 const STATUS_STEPS = ["pending", "processing", "shipped", "delivered"];
 const currency = (n) => `$${asNumber(n).toLocaleString()}`;
@@ -17,7 +18,7 @@ export const AdminOrderDetail = () => {
     api.admin.order(orderId).then(({ order: responseOrder }) => setOrder(responseOrder)).catch((requestError) => setError(requestError.message)).finally(() => setLoading(false));
   }, [orderId]);
 
-  if (loading) return null;
+  if (loading) return <LoadingScreen inline label="Loading order..." />;
   if (!order) {
     return (
       <div>

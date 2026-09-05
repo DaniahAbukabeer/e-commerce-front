@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Users, Mail, Trash2 } from "lucide-react";
 import { StatusBadge } from "../../components/admin/StatusBadge";
 import { api, asNumber, normalizeStatus } from "../../api/client";
+import { LoadingScreen } from "../../components/LoadingScreen";
 
 export const AdminEventDetail = () => {
   const { eventId } = useParams();
@@ -18,7 +19,7 @@ export const AdminEventDetail = () => {
     }).catch((requestError) => setError(requestError.message)).finally(() => setLoading(false));
   }, [eventId]);
 
-  if (loading) return null;
+  if (loading) return <LoadingScreen inline label="Loading event..." />;
   if (!event) {
     return (
       <div>

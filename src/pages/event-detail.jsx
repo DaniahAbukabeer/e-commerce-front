@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { mascot } from "../assets/mascot";
 import { api, asNumber } from "../api/client";
+import { LoadingScreen } from "../components/LoadingScreen";
 
 const EVENT_MEDIA = {
   "linocut-workshop": {
@@ -100,10 +101,11 @@ export const EventDetail = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
   const carouselRef = useRef(null);
 
   useEffect(() => {
-    api.store.event(eventId).then(({ event: responseEvent }) => setEvent({ ...responseEvent, ...(EVENT_MEDIA[eventId] || { images: [], videos: [] }) })).catch((requestError) => setError(requestError.message));
+    api.store.event(eventId).then(({ event: responseEvent }) => setEvent({ ...responseEvent, ...(EVENT_MEDIA[eventId] || { images: [], videos: [] }) })).catch((requestError) => setError(requestError.message)).finally(() => setLoading(false));
   }, [eventId]);
 
   const activeDay = useMemo(
@@ -111,7 +113,7 @@ export const EventDetail = () => {
     [event, selectedDay],
   );
 
-  if (!event && !error) return null;
+  if (loading) return <LoadingScreen label="Loading event..." />;
   if (!event) {
     return (
       <section className="page">

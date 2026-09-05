@@ -11,6 +11,7 @@ import {
 import { StatusBadge } from "../../components/admin/StatusBadge";
 import { StatCard } from "../../components/admin/StatCard";
 import { api, formatDate, normalizeStatus } from "../../api/client";
+import { LoadingScreen } from "../../components/LoadingScreen";
 
 const FILTERS = ["all", "active", "paused", "past_due", "cancelled"];
 
@@ -19,9 +20,10 @@ export const AdminMailClub = () => {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.admin.subscribers().then(({ subscribers: responseSubscribers }) => setSubscribers(responseSubscribers)).catch((requestError) => setError(requestError.message));
+    api.admin.subscribers().then(({ subscribers: responseSubscribers }) => setSubscribers(responseSubscribers)).catch((requestError) => setError(requestError.message)).finally(() => setLoading(false));
   }, []);
 
   const filtered = useMemo(() => {
@@ -38,6 +40,8 @@ export const AdminMailClub = () => {
 
   const active = subscribers.filter((s) => normalizeStatus(s.status) === "active").length;
   const mrr = active * 12;
+
+  if (loading) return <LoadingScreen inline label="Loading subscribers..." />;
 
   const toggleStatus = async (id, status) => {
     try {

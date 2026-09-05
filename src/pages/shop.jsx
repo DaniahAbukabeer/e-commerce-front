@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
 import { mascot } from "../assets/mascot";
 import { api, asNumber } from "../api/client";
+import { LoadingScreen } from "../components/LoadingScreen";
 
 export const Shop = () => {
   const [products, setProducts] = useState([]);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.store.products().then(({ products: responseProducts }) => setProducts(responseProducts)).catch((requestError) => setError(requestError.message));
+    api.store.products().then(({ products: responseProducts }) => setProducts(responseProducts)).catch((requestError) => setError(requestError.message)).finally(() => setLoading(false));
   }, []);
+  if (loading) return <LoadingScreen label="Loading the shop..." />;
   return (
     <section className="page">
       <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
